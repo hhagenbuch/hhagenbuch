@@ -72,4 +72,9 @@ solid = builds on / guards; thick = eval gate.
 - [mcp-pact](https://github.com/hhagenbuch/mcp-pact) — Pact-style contract testing
   for MCP servers, so a tool schema change can't silently break its consumers.
 
+**Method**
+- [agent-engineering-playbook](https://github.com/hhagenbuch/agent-engineering-playbook) —
+  the method behind the repos: the specs, review gates, and quality bars used to
+  direct AI agents through building everything above.
+
 📫 heyward360@gmail.com
