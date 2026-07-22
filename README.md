@@ -24,6 +24,8 @@ flowchart TB
     operator["<b>agent-operator</b><br/>k8s operator: prompt-version canaries"]
     evals["<b>agent-evals</b><br/>JUnit for agents — CI exit-code gate"]
     mcppact["<b>mcp-pact</b><br/>contract tests for MCP servers"]
+    medic["<b>agent-medic</b><br/>incident &rarr; gated prompt repair"]
+    slo["<b>agent-slo</b><br/>behavioral SLOs + promotion freeze"]
 
     meter -. "wraps LlmClient (cost)" .-> starter
     blackbox -. "wraps LlmClient (record)" .-> starter
@@ -34,6 +36,10 @@ flowchart TB
     evals ==>|gates| starter
     evals ==>|gates| castaway
     evals ==>|gates| operator
+    medic -->|"diagnoses from traces"| blackbox
+    medic ==>|"repairs ship as gated prompt canaries"| operator
+    slo -->|"continuous evals are the SLI"| evals
+    slo ==>|"budget burn freezes promotions"| operator
 
     classDef core fill:#1f6feb,stroke:#0b3d91,color:#fff;
     class starter core;
@@ -65,12 +71,18 @@ solid = builds on / guards; thick = eval gate.
 - [agent-operator](https://github.com/hhagenbuch/agent-operator) — a Kubernetes
   operator that treats a prompt like code: canary a new prompt version, gate the
   promotion on an eval Job, roll back on failure.
+- [agent-medic](https://github.com/hhagenbuch/agent-medic) — the immune system:
+  a production failure becomes a regression case, a gated prompt repair, and a
+  human-approved promotion. Every incident permanently hardens the eval suite.
 
 **Quality gates & contracts**
 - [agent-evals](https://github.com/hhagenbuch/agent-evals) — JUnit for LLM agents:
   golden datasets, LLM-as-judge, exit-code CI gates (used across the platform).
 - [mcp-pact](https://github.com/hhagenbuch/mcp-pact) — Pact-style contract testing
   for MCP servers, so a tool schema change can't silently break its consumers.
+- [agent-slo](https://github.com/hhagenbuch/agent-slo) — behavioral SLOs: error
+  budgets for honesty, tool discipline, and cost, where budget burn freezes
+  prompt promotions. RFC + proving slice.
 
 **Method**
 - [agent-engineering-playbook](https://github.com/hhagenbuch/agent-engineering-playbook) —
