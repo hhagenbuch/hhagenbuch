@@ -26,6 +26,8 @@ flowchart TB
     mcppact["<b>mcp-pact</b><br/>contract tests for MCP servers"]
     medic["<b>agent-medic</b><br/>incident &rarr; gated prompt repair"]
     slo["<b>agent-slo</b><br/>behavioral SLOs + promotion freeze"]
+    fathom["<b>fathom</b><br/>agnostic verified context + impact engine"]
+    conductor["<b>conductor</b><br/>cross-repo change-awareness daemon"]
 
     meter -. "wraps LlmClient (cost)" .-> starter
     blackbox -. "wraps LlmClient (record)" .-> starter
@@ -40,6 +42,9 @@ flowchart TB
     medic ==>|"repairs ship as gated prompt canaries"| operator
     slo -->|"continuous evals are the SLI"| evals
     slo ==>|"budget burn freezes promotions"| operator
+    fathom -. "mounts as MCP context tools" .-> starter
+    mcppact -->|"contract-tests"| fathom
+    conductor -->|"Flock consumes impact graph"| fathom
 
     classDef core fill:#1f6feb,stroke:#0b3d91,color:#fff;
     class starter core;
@@ -83,6 +88,18 @@ solid = builds on / guards; thick = eval gate.
 - [agent-slo](https://github.com/hhagenbuch/agent-slo) — behavioral SLOs: error
   budgets for honesty, tool discipline, and cost, where budget burn freezes
   prompt promotions. RFC + proving slice.
+
+**Context & coordination**
+- [fathom](https://github.com/hhagenbuch/fathom) — an agnostic, verified,
+  local-first context engine: the *same* tools answer "what breaks if I rename
+  this class?" and "what breaks if I drop this column?" over one typed graph, it
+  verifies every answer against the source before returning it (a stale index
+  says so instead of guessing), and it marks contract surface + cross-repo impact.
+  No vector database. Contract-tested by mcp-pact.
+- [conductor](https://github.com/hhagenbuch/conductor) — a cross-repo
+  change-awareness daemon. Its Flock feature consumes fathom's impact graph to
+  warn a live agent session when a contract surface another repo depends on is
+  about to change ... coordination before the break, not after.
 
 **Method**
 - [agent-engineering-playbook](https://github.com/hhagenbuch/agent-engineering-playbook) —
